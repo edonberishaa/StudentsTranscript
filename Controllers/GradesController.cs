@@ -24,7 +24,23 @@ namespace StudentsTranscript.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Grades>>> GetGrades()
         {
-            return await _context.Grades.ToListAsync();
+            var grades = await _context.Grades
+                .Include(s => s.Student)
+                .Select(g => new
+                {
+                    g.ID,
+                    g.Subject,
+                    g.Grade,
+                    Student = new
+                    {
+                        g.Student.ID,
+                        g.Student.Name,
+                        g.Student.Email
+                    }
+                })
+                .ToListAsync();
+
+            return Ok(grades);
         }
 
         // GET: api/Grades/5

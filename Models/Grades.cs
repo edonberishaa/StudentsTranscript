@@ -10,5 +10,8 @@ namespace StudentsTranscript.Models
         public string Subject { get; set; }
         public decimal Grade { get; set; }
 
+        public virtual Students Student { get; set; }
+
+
     }
 }

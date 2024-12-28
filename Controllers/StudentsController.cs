@@ -99,6 +99,54 @@ namespace StudentsTranscript.Controllers
             return NoContent();
         }
 
+        [HttpGet("filter")]
+        public async Task<ActionResult<IEnumerable<Students>>> FilterStudents(
+            [FromQuery]string? name,
+            [FromQuery]int? minAge,
+            [FromQuery]string? sortBy)
+        {
+            var query = _context.Students.AsQueryable();
+            if (!string.IsNullOrEmpty(name))
+            {
+                query = query.Where(s => s.Name.Contains(name));
+            }
+            if (minAge.HasValue)
+            {
+                query = query.Where(s => DateTime.Now.Year - s.DateOfBirth.Year >=
+                minAge.Value);
+            }
+            if(!string.IsNullOrEmpty(sortBy))
+            {
+                query = sortBy switch
+                {
+                    "name" => query.OrderBy(s => s.Name),
+                    "age" => query.OrderBy(s => s.DateOfBirth),
+                    _ => query
+                };
+            }
+            return await query.ToListAsync();
+        }
+        [HttpGet("with-grades")]
+        public async Task<ActionResult<IEnumerable<object>>> GetStudentsWithGrades()
+        {
+            var studentsWithGrades = await _context.Students
+                .Include(s => s.Grades) // Load related grades (this will load the collection of grades)
+                .Select(s => new
+                {
+                    s.ID,  // Use the correct property name for the student ID
+                    s.Name,
+                    s.Email,
+                    Grades = s.Grades.Select(g => new
+                    {
+                        g.Subject,
+                        g.Grade  // The property name for grade is "Grade", not "GradeValue"
+                    })
+                })
+                .ToListAsync();
+
+            return Ok(studentsWithGrades);
+        }
+
         private bool StudentsExists(int id)
         {
             return _context.Students.Any(e => e.ID == id);

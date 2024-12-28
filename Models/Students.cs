@@ -9,5 +9,7 @@ namespace StudentsTranscript.Models
         public string Name { get; set; }
         public string Email { get; set; }
         public DateTime DateOfBirth { get; set; }
+        public IEnumerable<Grades> Grades { get; set; }
+
     }
 }
