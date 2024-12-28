@@ -20,6 +20,28 @@ namespace StudentsTranscript.Controllers
             _context = context;
         }
 
+        [HttpGet("performance/{studentId}")]
+        public async Task<ActionResult<object>> GetStudentPerformance(int studentId)
+        {
+            var grades = await _context.Grades
+                .Where(g => g.StudentID == studentId) // Filter by student
+                .ToListAsync();
+
+            if (!grades.Any())
+            {
+                return NotFound("No grades found for this student.");
+            }
+
+            var report = new
+            {
+                AverageGrade = grades.Average(g => g.Grade),
+                MaxGrade = grades.Max(g => g.Grade),
+                MinGrade = grades.Min(g => g.Grade)
+            };
+
+            return Ok(report);
+        }
+
         // GET: api/Grades
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Grades>>> GetGrades()

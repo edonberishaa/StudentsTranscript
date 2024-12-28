@@ -20,11 +20,28 @@ namespace StudentsTranscript.Controllers
             _context = context;
         }
 
-        // GET: api/Students
+        [HttpGet("paginated")]
+        public async Task<ActionResult<IEnumerable<Students>>> GetPaginatedStudents(
+             [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10)
+         {
+                var students = await _context.Students
+                        .Skip((pageNumber - 1) * pageSize) // Skip records based on page number
+                        .Take(pageSize) // Limit the number of records returned
+                        .ToListAsync();
+
+               return Ok(students);
+         }
+
+
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Students>>> GetStudents()
         {
-            return await _context.Students.ToListAsync();
+
+            var students = await _context.Students
+                .ToListAsync();
+
+            return Ok(students);
         }
 
         // GET: api/Students/5
